@@ -29,7 +29,7 @@ config:
     packages:
       - mysql-server
     write_files:
-      - content: | 
+      content: | 
         #!/bin/bash
         set -e
         set -x trace

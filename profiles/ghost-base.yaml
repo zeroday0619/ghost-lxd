@@ -32,7 +32,7 @@ config:
       - gnupg
       - nodejs
     write_files:
-      - content: | 
+      content: | 
         #!/bin/bash
         set -e
         set -x trace
