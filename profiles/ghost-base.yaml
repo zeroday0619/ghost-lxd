@@ -2,9 +2,9 @@ name: ghost_base
 
 description: ghost_base
 devices:
-  lxdbr0:
-    name: lxdbr0
-    parent: enp1s0
+  eth0:
+    name: eth0
+    parent: lxdbr0
     nictype: macvlan
     type: nic
   root:
