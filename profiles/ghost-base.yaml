@@ -1,0 +1,55 @@
+name: ghost_base
+
+description: ghost_base
+devices:
+  lxdbr0:
+    name: lxdbr0
+    parent: enp1s0
+    nictype: macvlan
+    type: nic
+  root:
+    path: /
+    pool: ghost_storage
+    type: disk
+config:
+  boot.autostart: true
+  limits.cpu: 2
+  user.network-config: |
+    version: 1
+    config:
+      - type: physical
+        name: eth0
+        subnets:
+          - type: dhcp
+            ipv4: true
+            ipv6: true
+  user.user-data: |
+    #cloud-config
+    package_upgrade: true
+    packages:
+      - ca-certificates
+      - curl
+      - gnupg
+      - nodejs
+    write_files:
+      - content: | 
+        #!/bin/bash
+        set -e
+        set -x trace
+
+        sudo npm install ghost-cli@latest -g
+      path: /opt/ghost_install.sh
+      permissions: '0755'
+      owner: root:root
+    runcmd:
+      - ['/opt/ghost_install.sh']
+    
+    users:
+      - name: ghost
+        gecos: ghost
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        groups: ubuntu, adm, dialout, sudo, netdev, plugdev, mastodon_data
+        lock_passwd: true
+        ssh-authorized-keys:
+          - <<SSH_PUBLIC>>

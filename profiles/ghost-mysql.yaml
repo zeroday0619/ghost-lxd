@@ -1,0 +1,67 @@
+name: ghost_mysql
+
+description: ghost_mysql
+devices:
+  lxdbr0:
+    name: lxdbr0
+    parent: enp1s0
+    nictype: macvlan
+    type: nic
+  root:
+    path: /
+    pool: ghost_mysql_storage
+    type: disk
+  data:
+    path: /data/ghost_mysql
+    pool: ghost_mysql_storage
+    source: ghost_mysql_data
+    type: disk
+config:
+  boot.autostart: true
+  limits.cpu: 2
+  user.network-config: |
+    version: 1
+    config:
+      - type: physical
+        name: eth0
+        subnets:
+          - type: dhcp
+            ipv4: true
+            ipv6: true
+  user.user-data: |
+    #cloud-config
+    package_upgrade: true
+    packages:
+      - mysql-server
+    write_files:
+      - content: | 
+        #!/bin/bash
+        set -e
+        set -x trace
+
+        cd /
+        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '<<MYSQL_ROOT_PASSWARD>>';"
+        mysql -e "FLUSH PRIVILEGES;"
+
+      path: /tmp/mysql_setup.sh
+      permissions: '0755'
+      owner: root:root
+    runcmd:
+      - "sudo groupadd ghost_mysql"
+      - "sudo chown mysql /data/ghost_mysql"
+      - "sudo chgrp ghost_mysql /data/ghost_mysql"
+      - "sudo systemctl stop mysql.service"
+      - "sudo mv /var/lib/mysql /data/ghost_mysql"
+      - "sudo ln -s "/data/ghost_mysql/mysql /var/lib/mysql"
+      - "sudo systemctl start mysql.service"
+      - "sudo -u mysql bash /tmp/mysql_install.sh 2> /tmp/install-error-log.txt 1> /tmp/install-log.txt"
+    
+    users:
+      - name: ghost_mysql
+        gecos: ghost_mysql
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        groups: ubuntu, adm, dialout, sudo, netdev, plugdev, mastodon_data
+        lock_passwd: true
+        ssh-authorized-keys:
+          - <<SSH_PUBLIC>>
