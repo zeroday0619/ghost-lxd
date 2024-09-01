@@ -4,8 +4,7 @@ description: ghost_mysql
 devices:
   eth0:
     name: eth0
-    parent: lxdbr0
-    nictype: macvlan
+    network: lxdbr0
     type: nic
   root:
     path: /
@@ -28,18 +27,6 @@ config:
     package_upgrade: true
     packages:
       - mysql-server
-    write_files:
-      content: | 
-        #!/bin/bash
-        set -e
-        set -x trace
-
-        cd /
-        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '<<MYSQL_ROOT_PASSWARD>>';"
-        mysql -e "FLUSH PRIVILEGES;"
-
-      path: /tmp/mysql_setup.sh
-      permissions: '0755'
-      owner: root:root
     runcmd:
-      - "sudo -u mysql bash /tmp/mysql_install.sh 2> /tmp/install-error-log.txt 1> /tmp/install-log.txt"
+      - 'mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '<<MYSQL_ROOT_PASSWARD>>';"'
+      - 'mysql -e "FLUSH PRIVILEGES;"'

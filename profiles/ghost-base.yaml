@@ -4,8 +4,7 @@ description: ghost_base
 devices:
   eth0:
     name: eth0
-    parent: lxdbr0
-    nictype: macvlan
+    network: lxdbr0
     type: nic
   root:
     path: /
@@ -31,18 +30,9 @@ config:
       - curl
       - gnupg
       - nodejs
-    write_files:
-      content: | 
-        #!/bin/bash
-        set -e
-        set -x trace
-
-        sudo npm install ghost-cli@latest -g
-      path: /opt/ghost_install.sh
-      permissions: '0755'
-      owner: root:root
+      - npm
     runcmd:
-      - ['/opt/ghost_install.sh']
+      - sudo npm install ghost-cli@latest -g
     
     users:
       - name: ghost
