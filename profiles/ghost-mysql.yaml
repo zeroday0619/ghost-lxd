@@ -11,11 +11,6 @@ devices:
     path: /
     pool: ghost_mysql_storage
     type: disk
-  data:
-    path: /data/ghost_mysql
-    pool: ghost_mysql_storage
-    source: ghost_mysql_data
-    type: disk
 config:
   boot.autostart: true
   limits.cpu: 2
@@ -47,21 +42,4 @@ config:
       permissions: '0755'
       owner: root:root
     runcmd:
-      - "sudo groupadd ghost_mysql"
-      - "sudo chown mysql /data/ghost_mysql"
-      - "sudo chgrp ghost_mysql /data/ghost_mysql"
-      - "sudo systemctl stop mysql.service"
-      - "sudo mv /var/lib/mysql /data/ghost_mysql"
-      - "sudo ln -s "/data/ghost_mysql/mysql /var/lib/mysql"
-      - "sudo systemctl start mysql.service"
       - "sudo -u mysql bash /tmp/mysql_install.sh 2> /tmp/install-error-log.txt 1> /tmp/install-log.txt"
-    
-    users:
-      - name: ghost_mysql
-        gecos: ghost_mysql
-        sudo: ALL=(ALL) NOPASSWD:ALL
-        shell: /bin/bash
-        groups: ubuntu, adm, dialout, sudo, netdev, plugdev, mastodon_data
-        lock_passwd: true
-        ssh-authorized-keys:
-          - <<SSH_PUBLIC>>
